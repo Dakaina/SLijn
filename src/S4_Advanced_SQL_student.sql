@@ -113,13 +113,13 @@ GROUP BY
 -- er werkt (`aantal_medewerkers`), de gemiddelde commissie die ze
 -- krijgen (`commissie_medewerkers`), en hoeveel dat gemiddeld
 -- per verkoper is (`commissie_verkopers`).
--- DROP VIEW IF EXISTS s4_7; CREATE OR REPLACE VIEW s4_7 AS                                                     -- [TEST]
+DROP VIEW IF EXISTS s4_7; CREATE OR REPLACE VIEW s4_7 AS                                                     -- [TEST]
 SELECT
     count(*) as aantal_medewerkers,
-    avg(comm) / count(*) as commissie_medewerkers,
+    sum(comm) / count(*) as commissie_medewerkers,
     avg(comm) as commissie_verkopers
 FROM
-    medewerkers
+    medewerkers;
 
 -- -------------------------[ HU TESTRAAMWERK ]--------------------------------
 -- Met onderstaande query kun je je code testen. Zie bovenaan dit bestand
