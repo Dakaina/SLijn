@@ -37,7 +37,7 @@ SELECT
 FROM
     medewerkers
 WHERE
-        EXTRACT(YEAR FROM gbdatum) < 1980 AND (functie = 'TRAINER' OR functie = 'VERKOPER');
+        date_part('year', gbdatum) < 1980 AND (functie = 'TRAINER' OR functie = 'VERKOPER');
 
 -- S4.2. 
 -- Geef de naam van de medewerkers met een tussenvoegsel (b.v. 'van der').
@@ -109,7 +109,7 @@ GROUP BY
 DROP VIEW IF EXISTS s4_6; CREATE OR REPLACE VIEW s4_6 AS                                                     -- [TEST]
 SELECT
     (MAX(gbdatum) - MIN(gbdatum)) / 365 AS verschil,
-    AVG(EXTRACT(YEAR FROM current_date) - EXTRACT(YEAR FROM gbdatum)) AS gemiddeld
+    AVG(date_part('year', current_date) - date_part('year', gbdatum)) AS gemiddelde
 FROM
     medewerkers;
 
