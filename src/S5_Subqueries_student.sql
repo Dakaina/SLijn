@@ -66,16 +66,16 @@ DROP VIEW IF EXISTS s5_4a; CREATE OR REPLACE VIEW s5_4a AS                      
 SELECT
     naam
 FROM
-    medewerkers m1
-WHERE EXISTS (SELECT FROM medewerkers WHERE m1.mnr = chef);
+    medewerkers
+WHERE mnr IN (SELECT chef FROM medewerkers);
 
 -- b. En welke medewerkers hebben geen ondergeschikten? Geef wederom de naam.
 DROP VIEW IF EXISTS s5_4b; CREATE OR REPLACE VIEW s5_4b AS                                                   -- [TEST]
 SELECT
     naam
 FROM
-    medewerkers m1
-WHERE NOT EXISTS (SELECT FROM medewerkers WHERE m1.mnr = chef);
+    medewerkers
+WHERE mnr NOT IN (SELECT chef FROM medewerkers WHERE chef IS NOT NULL);
 
 -- S5.5.
 -- Geef cursuscode en begindatum van alle uitvoeringen van programmeercursussen
