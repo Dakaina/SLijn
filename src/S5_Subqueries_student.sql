@@ -110,8 +110,10 @@ SELECT
 FROM
     medewerkers
 WHERE
-    functie = 'TRAINER';
-
+        functie = 'TRAINER' AND chef IN
+                                (SELECT cursist from inschrijvingen where cursus IN
+                                    (select code from cursussen where type = 'ALG' AND code IN
+                                        (SELECT cursus FROM uitvoeringen WHERE docent = mnr)));
 
 -- S5.8.
 -- Geef de naam van de medewerkers die nog nooit een cursus hebben gegeven.
