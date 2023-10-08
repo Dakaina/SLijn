@@ -89,6 +89,7 @@ Hoe lager hoe sneller.
 -- Maak om dit te bereiken een subquery in je WHERE clause.
 -- Sorteer het resultaat van de hele geheel op levertijd (desc) en verkoper.
 -- 1. Maak hieronder deze query (als je het goed doet zouden er 377 rijen uit moeten komen, en het kan best even duren...)
+
 SELECT
     o.order_id,
     o.order_date,
@@ -97,7 +98,15 @@ SELECT
     ol.quantity
 FROM
     orders o
-JOIN order_lines ol ON o.order_id = ol.order_id;
+JOIN
+    order_lines ol ON o.order_id = ol.order_id
+WHERE
+    quantity > 250 AND o.salesperson_person_id IN
+                       (SELECT salesperson_person_id
+                        FROM orders
+                        GROUP BY salesperson_person_id
+                        HAVING avg(expected_delivery_date - order_date) > 1.45)
+ORDER BY levertijd desc, verkoper;
 
 
 -- S7.3.B
