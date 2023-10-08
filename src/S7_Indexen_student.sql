@@ -112,14 +112,50 @@ ORDER BY levertijd desc, verkoper;
 -- S7.3.B
 --
 -- 1. Vraag het EXPLAIN plan op van je query (kopieer hier, onder de opdracht)
+    "Gather Merge  (cost=9723.72..9750.79 rows=232 width=20)"
+"  Workers Planned: 2"
+"  ->  Sort  (cost=8723.70..8723.99 rows=116 width=20)"
+"        Sort Key: ((o.expected_delivery_date - o.order_date)) DESC, o.salesperson_person_id"
+"        ->  Hash Join  (cost=2188.42..8719.72 rows=116 width=20)"
+"              Hash Cond: (o.salesperson_person_id = orders.salesperson_person_id)"
+"              ->  Nested Loop  (cost=0.29..6529.85 rows=386 width=20)"
+"                    ->  Parallel Seq Scan on order_lines ol  (cost=0.00..5051.27 rows=386 width=8)"
+"                          Filter: (quantity > 250)"
+"                    ->  Index Scan using pk_sales_orders on orders o  (cost=0.29..3.83 rows=1 width=16)"
+"                          Index Cond: (order_id = ol.order_id)"
+"              ->  Hash  (cost=2188.09..2188.09 rows=3 width=4)"
+"                    ->  HashAggregate  (cost=2187.91..2188.06 rows=3 width=4)"
+"                          Group Key: orders.salesperson_person_id"
+"                          Filter: (avg((orders.expected_delivery_date - orders.order_date)) > 1.45)"
+"                          ->  Seq Scan on orders  (cost=0.00..1635.95 rows=73595 width=12)"
 -- 2. Kijk of je met 1 of meer indexen de query zou kunnen versnellen
--- 3. Maak de index(en) aan en run nogmaals het EXPLAIN plan (kopieer weer onder de opdracht) 
+CREATE INDEX idx_quantity ON order_lines (quantity)
+-- 3. Maak de index(en) aan en run nogmaals het EXPLAIN plan (kopieer weer onder de opdracht)
+"Sort  (cost=6471.64..6472.34 rows=278 width=20)"
+"  Sort Key: ((o.expected_delivery_date - o.order_date)) DESC, o.salesperson_person_id"
+"  ->  Hash Join  (cost=4380.28..6460.36 rows=278 width=20)"
+"        Hash Cond: (o.order_id = ol.order_id)"
+"        ->  Hash Join  (cost=2188.13..4099.15 rows=22078 width=16)"
+"              Hash Cond: (o.salesperson_person_id = orders.salesperson_person_id)"
+"              ->  Seq Scan on orders o  (cost=0.00..1635.95 rows=73595 width=16)"
+"              ->  Hash  (cost=2188.09..2188.09 rows=3 width=4)"
+"                    ->  HashAggregate  (cost=2187.91..2188.06 rows=3 width=4)"
+"                          Group Key: orders.salesperson_person_id"
+"                          Filter: (avg((orders.expected_delivery_date - orders.order_date)) > 1.45)"
+"                          ->  Seq Scan on orders  (cost=0.00..1635.95 rows=73595 width=12)"
+"        ->  Hash  (cost=2180.58..2180.58 rows=926 width=8)"
+"              ->  Bitmap Heap Scan on order_lines ol  (cost=11.47..2180.58 rows=926 width=8)"
+"                    Recheck Cond: (quantity > 250)"
+"                    ->  Bitmap Index Scan on idx_quantity  (cost=0.00..11.24 rows=926 width=0)"
+"                          Index Cond: (quantity > 250)"
 -- 4. Wat voor verschillen zie je? Verklaar hieronder.
-
+cost van Sort in het begin is met ongeveer 2000 omlaag gegaan en de nieuwe index quantity search heeft een
+extreem lage cost.
 
 
 -- S7.3.C
 --
 -- Zou je de query ook heel anders kunnen schrijven om hem te versnellen?
-
+Met mijn matige sql kennis vind ik dat het al optimaal genoeg is geschreven en niet veel verbeterd kan worden.
+Ik ga altijd dezelfde punten nodig hebben dus wat ik ook schrijf het gaat om dezelfde dingen moeten vragen.
 
