@@ -19,6 +19,7 @@ FROM inschrijvingen i, uitvoeringen u;
 --     CREATE OR REPLACE VIEW personeel AS
 -- 	     SELECT mnr, voorl, naam as medewerker, afd, functie
 --       FROM medewerkers;
+--Weet niet precies waar je het mee gecombineerd wou hebben. cursist of docent dus voor cursist gekozen.
 SELECT *
 FROM deelnemers d
 JOIN personeel l ON d.cursist = l.mnr;
