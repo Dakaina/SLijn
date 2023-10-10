@@ -148,7 +148,27 @@ is met onze nieuwe index het toch slomer. De total cost van de parent is van 652
 -- S7.3.C
 --
 -- Zou je de query ook heel anders kunnen schrijven om hem te versnellen?
-Ik zou zeggen misschien een materialized view aanmaken van de gemiddelde levertijd salesperson ids maar
-dat zou je wel constant moeten updaten elke keer dat er een nieuwe row in tabel order komt. Dit bespaart
-zo een 1000 aan totale kosten.
+Ik zou zeggen misschien een materialized view aanmaken van de subquery maar
+dat zou je wel constant moeten updaten elke keer dat er een nieuwe row in tabel order komt.
+Dit bespaart zo een 1000 aan totale kosten.
+View:
+CREATE MATERIALIZED VIEW gmd_salesperson AS SELECT salesperson_person_id
+                                            FROM orders
+                                            GROUP BY salesperson_person_id
+                                            HAVING avg(expected_delivery_date - order_date) > 1.45;
+Query:
+SELECT
+    o.order_id,
+    o.order_date,
+    o.salesperson_person_id as verkoper,
+    o.expected_delivery_date - o.order_date as levertijd,
+    ol.quantity
+FROM
+    gmd_salesperson gmd
+    orders o
+JOIN
+    order_lines ol ON o.order_id = ol.order_id
+WHERE
+    quantity > 250 AND o.salesperson_person_id = gmd.salesperson_person_id
+ORDER BY levertijd desc, verkoper;
 
