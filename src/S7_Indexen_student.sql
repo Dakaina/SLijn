@@ -33,17 +33,10 @@
 "        Index Cond: (stock_item_id = 9)"
 -- 4. Verklaar de verschillen. Schrijf deze hieronder op.
 Zonder index zoekt het in een parallel sequential scan (door hele tabel heen zoeken voor rows waar stock item id 9 is).
-Gather bovenaan zegt hoelang het hele proces heeft geduurd gemeten in cost.
-Parallel Seq Scan cost is alleen hoelang het zoeken voor passende resultaten heeft geduurd.
+Totale cost is 11303.54
 
-Met index checkt de conditie (stockitem id 9) daarna via de index die we hebben gecreeerd ord_lines_si_id_idx
-(zorgt voor structuur en orde) zoekt het vindt het rows waar stock item id 9 is.
-Bitmap HeapScan cost is totale tijd van hele proces gemeten in cost.
-Bitmap Index Scan is alleen hoelang het zoeken voor passende resultaten heeft geduurd.
-
-In de resultaten boven kan je zien dat niet alleen het totale tijd maar ook het zoeken tijd extreem veel langer duurde
-bij het zoeken zonder index dan met index.
-
+Index scan zoekt eerst de posities in een Index en daarna worden die posities opgehaald uit de tabel
+Totale cost is 4611.35 en dat is best wat lager dan zonder index.
 -- S7.2.
 --
 -- 1. Maak de volgende twee query’s:
@@ -55,9 +48,8 @@ bij het zoeken zonder index dan met index.
 "  Filter: (customer_id = 1028)"
 -- 2. Analyseer met EXPLAIN hoe de query’s uitgevoerd worden en kopieer het explain plan onderaan de opdracht
 -- 3. Verklaar de verschillen en schrijf deze op
-    orders is een primary key en dus krijgt het bij het maken van de table automatisch ook een index. Hierdoor kan het
-    makkelijk gevonden worden.
-    customer_id heeft geen index en zoekt het via een sequential scan door de hele table heen totdat het gevonden wordt.
+    orders is een primary key en dus krijgt het bij het maken van de tabel automatisch ook een index.
+    customer_id heeft geen index en dus wordt het gezocht via een sequential scan
 -- 4. Voeg een index toe, waarmee query B versneld kan worden
     CREATE INDEX inx_customer_id ON orders (customer_id);
 -- 5. Analyseer met EXPLAIN en kopieer het explain plan onder de opdracht
@@ -66,10 +58,9 @@ bij het zoeken zonder index dan met index.
 "  ->  Bitmap Index Scan on inx_customer_id  (cost=0.00..5.10 rows=107 width=0)"
 "        Index Cond: (customer_id = 1028)"
 -- 6. Verklaar de verschillen en schrijf hieronder op
-Het probeert nu te zoeken met een index en dus is het een index scan voor de customer id inplaats van een normale sequential
-scan wat door heel het tabel heen gaat. Je kan zien dat de seq scan cost veel hoger is dan de bitmap index scan cost.
-Hoe lager hoe sneller.
-
+Zonder index is de totale cost 1819.94 en met index is het 308.96 dus het kost veel minder
+om de passende resultaten te vinden. Het enige wat iets meer kost is het opstarten
+bij een index (5.12 vergeleken met 0.00) maar in het algemeen wint het nogsteeds.
 
 -- S7.3.A
 --
@@ -149,13 +140,14 @@ CREATE INDEX idx_quantity ON order_lines (quantity)
 "                    ->  Bitmap Index Scan on idx_quantity  (cost=0.00..11.24 rows=926 width=0)"
 "                          Index Cond: (quantity > 250)"
 -- 4. Wat voor verschillen zie je? Verklaar hieronder.
-cost van Sort in het begin is met ongeveer 2000 omlaag gegaan en de nieuwe index quantity search heeft een
-extreem lage cost.
-
+Totale cost is omlaag gegaan van 9750.79 naar 6472.34
+Er is nu een index scan bij de quantity check door het aanmaken van idx_quantity
+Index scan van orders o is nu sequential geworden. Hoewel de index scan origineel wel minder kostte
+is met onze nieuwe index het toch slomer. De total cost van de parent is van 6529.85 naar 2188.06 gegaan
 
 -- S7.3.C
 --
 -- Zou je de query ook heel anders kunnen schrijven om hem te versnellen?
-Met mijn matige sql kennis vind ik dat het al optimaal genoeg is geschreven en niet veel verbeterd kan worden.
-Ik ga altijd dezelfde punten nodig hebben dus wat ik ook schrijf het gaat om dezelfde dingen moeten vragen.
+Ik zou zeggen misschien een manier vinden om van de subquery een join te maken sinds
+in het algemeen joins sneller zijn dan subqueries wegens dat ze gebruik maken van andere processen.
 
