@@ -148,6 +148,7 @@ is met onze nieuwe index het toch slomer. De total cost van de parent is van 652
 -- S7.3.C
 --
 -- Zou je de query ook heel anders kunnen schrijven om hem te versnellen?
-Ik zou zeggen misschien een manier vinden om van de subquery een join te maken sinds
-in het algemeen joins sneller zijn dan subqueries wegens dat ze gebruik maken van andere processen.
+Ik zou zeggen misschien een materialized view aanmaken van de gemiddelde levertijd salesperson ids maar
+dat zou je wel constant moeten updaten elke keer dat er een nieuwe row in tabel order komt. Dit bespaart
+zo een 1000 aan totale kosten.
 
